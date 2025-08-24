@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 
+
 /**
  * Stok Takip – Supabase Senkronlu Tek Dosya (App.jsx)
  * - Supabase: buluttan çekme, yazma ve Realtime abonelik
@@ -99,9 +100,19 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [dark, setDark] = useState(localStorage.getItem(THEME_KEY) === "true");
   const [showUsers, setShowUsers] = useState(false);
+  const [cloudOk, setCloudOk] = useState(null);
 
   // local persist
   useEffect(() => { saveData(data); }, [data]);
+  
+useEffect(() => {
+  (async () => {
+    if (!supabase) { setCloudOk(false); return; }
+    const { error } = await supabase.from("warehouses").select("id").limit(1);
+    setCloudOk(!error);
+    
+  })();
+}, []);
 
   // theme
   useEffect(() => {
@@ -158,6 +169,9 @@ export default function App() {
             <IconButton onClick={() => setDark(!dark)} title="Tema değiştir">{dark ? "☀️" : "🌙"}</IconButton>
             <Button variant="danger" onClick={resetAll} title="Tüm verileri sıfırla">Sıfırla</Button>
           </div>
+          <span className={`text-xs px-2 py-1 rounded-full ${cloudOk ? 'bg-emerald-600' : 'bg-rose-600'} text-white`}>
+  {cloudOk ? 'Cloud: OK' : 'Cloud: OFF'}
+</span>
         </header>
 
         <main className="mt-5 grid grid-cols-1 xl:grid-cols-3 gap-5">
